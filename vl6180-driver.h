@@ -30,7 +30,7 @@ struct vl6180-params {
 } vl6180-params;
 
 /// Prototypes:
-void init();
+void initVL6180();
 void setMode(VL6180_MODE mode);
 void setALS_Gain( float gain);
 

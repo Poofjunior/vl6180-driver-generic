@@ -12,7 +12,7 @@
 #include "vl6180-driver.h"
 
 
-void init()
+void initVL6180()
 {
     clearModes();
     setALS_Gain(1);
