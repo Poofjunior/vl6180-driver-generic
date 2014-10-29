@@ -98,7 +98,7 @@ float singleShotReadALS()
     setMode(ALS_SINGLE_SHOT);
     writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_START, 0x01);
     while (!newALS_Data());
-    read(I2C, vl6180_Params.deviceAddress_, RESULT_ALS_VAL, 2, newData);
+    read16(I2C, vl6180_Params.deviceAddress_, RESULT_ALS_VAL, 2, newData);
     rawRegVal = ((uint16_t)newData[0] << 8) & newData[1];
 
     return ALS_LuxResolution_ * (rawRegVal / vl6180_Params.ALS_Gain_) * 
@@ -115,7 +115,7 @@ uint8_t singleShotReadRange()
     setMode(RANGE_SINGLE_SHOT);
     writeOne(I2C, vl6180_Params.deviceAddress_, SYSRANGE_START, 0x01);
     while (!newRangeData());
-    readOne(I2C, vl6180_Params.deviceAddress_, RESULT_RANGE_VAL, &newData);
+    read16(I2C, vl6180_Params.deviceAddress_, RESULT_RANGE_VAL, 1, &newData);
     return newData;
 }
 
@@ -125,8 +125,8 @@ uint8_t singleShotReadRange()
 void setSysALS_IntegrationPeriod(int ms)
 {
     uint8_t encodedMs = ms - 1;
-    writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_INTEGRATION_PERIOD, 
-             encodedMs);
+    write16(I2C, vl6180_Params.deviceAddress_, SYSALS_INTEGRATION_PERIOD, 
+            1, &encodedMs);
 }
 
 /**
@@ -134,60 +134,54 @@ void setSysALS_IntegrationPeriod(int ms)
  */
 void setSysALS_AnalogGain(float gain)
 {
+    uint8_t gainReg; 
     if (gain <= 1.0)
     {
         vl6180_Params.ALS_Gain_ = 1.0;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x06); /// Default gain: 1.0    /// TODO: make this clearer
+        gainReg = 0x06;
     }
     else if (gain <= 1.25)
     {
         vl6180_Params.ALS_Gain_ = 1.25;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x05); 
+        gainReg = 0x05;
     }
     else if (gain <= 1.67)
     {
         vl6180_Params.ALS_Gain_ = 1.67;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x04); 
+        gainReg = 0x04;
     }
     else if (gain <= 2.5)
     {
         vl6180_Params.ALS_Gain_ = 2.5;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x03); 
+        gainReg = 0x03;
     }
     else if (gain <= 5.0)
     {
         vl6180_Params.ALS_Gain_ = 5.0;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x02); 
+        gainReg = 0x02;
     }
     else if (gain <= 10)
     {
         vl6180_Params.ALS_Gain_ = 10.0;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x01); 
+        gainReg = 0x01;
     }
     else if (gain <= 20)
     {
         vl6180_Params.ALS_Gain_ = 20.0;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x00); 
+        gainReg = 0x00;
     }
     else if (gain <= 40)
     {
         vl6180_Params.ALS_Gain_ = 40.0;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x07); 
+        gainReg = 0x07;
     }
     else
     {
         vl6180_Params.ALS_Gain_ = 1.0;
-        writeOne(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
-                 0x06); /// Default gain: 1.0
+        gainReg = 0x06;/// Default gain: 1.0
     }
+        write16(I2C, vl6180_Params.deviceAddress_, SYSALS_ANALOGUE_GAIN, 
+                1, &gainReg); 
 }
 
 void clearModes()
@@ -201,8 +195,8 @@ void clearModes()
 uint8_t newRangeData()
 {
     uint8_t readStatus;
-    readOne(I2C, vl6180_Params.deviceAddress_,  RESULT_INTERRUPT_STATUS_GPIO, 
-            &readStatus);
+    read16(I2C, vl6180_Params.deviceAddress_,  RESULT_INTERRUPT_STATUS_GPIO, 
+           1, &readStatus);
     // Check if range data bitfield matches "new sample" code.
     return (readStatus & NEW_SAMPLE_READY);
 }
@@ -211,8 +205,8 @@ uint8_t newRangeData()
 uint8_t newALS_Data()
 {
     uint8_t readStatus;
-    readOne(I2C, vl6180_Params.deviceAddress_, RESULT_INTERRUPT_STATUS_GPIO, 
-            &readStatus);
+    read16(I2C, vl6180_Params.deviceAddress_, RESULT_INTERRUPT_STATUS_GPIO, 
+           1, &readStatus);
     // Check if als data bitfield matches "new sample" code.   
     return ((readStatus) >> RESULT_INT_ALS_GPIO) & NEW_SAMPLE_READY;
 }

@@ -59,6 +59,57 @@ void write(PERIPHERAL periph, uint8_t deviceAddress, uint8_t startReg,
 
 }
 
+void read16(PERIPHERAL periph, uint8_t deviceAddress, uint16_t startReg, 
+          uint8_t numBytes, uint8_t* data)
+{
+    switch (periph) {
+        case UART:
+        case I2C:
+            Wire.beginTransmission(deviceAddress);
+            Wire.write((uint8_t)(startReg & 0x00FF));
+            Wire.write((uint8_t)((startReg >> 8) & 0x00FF ));
+            Wire.endTransmission();
+            Wire.requestFrom(deviceAddress, numBytes);
+            for (uint8_t i = 0; i < numBytes; ++i)
+            {
+                while(!Wire.available());   // wait for next byte
+                data[i] = Wire.read();
+            }
+            break;
+        case SPI:
+        case PARALLEL:
+        case WISHBONE:
+        case CANBUS:
+        case JTAG:
+            return;
+    }
+
+}
+
+void write16(PERIPHERAL periph, uint8_t deviceAddress, uint16_t startReg, 
+           uint8_t numBytes, uint8_t* data)
+{
+    switch (periph) {
+        case UART:
+        case I2C:
+            Wire.beginTransmission(deviceAddress);
+            Wire.write((uint8_t)(startReg & 0x00FF));
+            Wire.write((uint8_t)((startReg >> 8) & 0x00FF ));
+            for (uint8_t i = 0; i < numBytes; ++i)
+                Wire.write(data[i]);
+            Wire.endTransmission();
+            break;
+        case SPI:
+        case PARALLEL:
+        case WISHBONE:
+        case CANBUS:
+        case JTAG:
+            return;
+    }
+
+}
+
+
 void readOne(PERIPHERAL periph, uint8_t deviceAddress,                          
              uint8_t startReg, uint8_t* data)                                   
 {                                                                               
