@@ -1,11 +1,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#ifndef VL6180_DRIVER_H
-#define VL6180_DRIVER_H
+#ifndef VL6180X_DRIVER_H
+#define VL6180X_DRIVER_H
 
 /**
- * \project vl6180-driver
+ * \project vl6180x-driver
  * \brief   a generic driver providing the most basic functionality 
  *          for the vl6180 proximity sensor. In a nutshell, you 
  *          implement the two functions read(...) and write(...),
@@ -21,20 +21,20 @@ extern "C" {
 typedef enum { RANGE_SINGLE_SHOT, ALS_SINGLE_SHOT, RANGE_CONTINUOUS, 
                ALS_CONTINUOUS, RANGE_CONTINUOUS_AND_ALS_SINGLE_SHOT,
                RANGE_SINGLE_SHOT_AND_ALS_CONTINUOUS,
-               INTERLEAVED} VL6180_MODE; 
+               INTERLEAVED} VL6180X_MODE; 
 /// Important VL6180 settings
-struct vl6180_SensorParams {
+struct vl6180x_SensorParams {
     /*const*/ uint8_t deviceAddress_; // 7-bit address in struct to prevent
                                          // name clashes for other sensors.
-    VL6180_MODE mode_;
+    VL6180X_MODE mode_;
     float ALS_Gain_;
     float ALS_IntegrationTime_;
 };
 
 
 /// Prototypes:
-void initVL6180();
-void setMode(VL6180_MODE mode);
+void initVL6180X();
+void setMode(VL6180X_MODE mode);
 void setALS_Gain( float gain);
 
 uint16_t readALS_FromContinuous();
@@ -127,7 +127,7 @@ static const uint16_t FIRMWARE_BOOTUP                           = 0x119;
 static const uint16_t FIRMWARE_RESULT_SCALER                    = 0x120;
 static const uint16_t I2C_SLAVE_DEVICE_ADDRESS                  = 0x212;
 static const uint16_t INTERLEAVED_MODE_ENABLE                   = 0x2A3;
-#endif //VL6180_DRIVER_H
+#endif //VL6180X_DRIVER_H
 #ifdef __cplusplus
 }
 #endif
